@@ -1,1 +1,689 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SNS Ratings</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#070d1a;--panel:rgba(255,255,255,.045);--line:rgba(255,255,255,.1);--text:#e8eef8;--muted:#8fa0bb;--accent:#22d3ee;--gold:#f5b942;--up:#34d399;--dn:#f87171;--st:#60a5fa;--tb:#0c1528;--upbg:rgba(52,211,153,.14);--dnbg:rgba(248,113,113,.13)}
+[data-theme=light]{--bg:#eef3fa;--panel:rgba(255,255,255,.85);--line:rgba(15,23,42,.12);--text:#0f172a;--muted:#55657e;--accent:#0891b2;--gold:#b45309;--up:#15803d;--dn:#b91c1c;--st:#1d4ed8;--tb:#f8fafc;--upbg:rgba(22,163,74,.14);--dnbg:rgba(220,38,38,.1)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);background:var(--bg);font-family:"Segoe UI",Inter,system-ui,Arial,sans-serif;font-size:14px}
+.wrap{max-width:1400px;margin:0 auto;padding:0 22px}
+.glass{background:var(--panel);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+a{color:var(--accent)}
+button,select,input{font:inherit}
+.topbar{position:sticky;top:10px;z-index:50;margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 18px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand a{display:flex;align-items:center}
+.brand img{height:46px;width:auto}
+.logo-fb{display:none;width:46px;height:46px;border-radius:12px;align-items:center;justify-content:center;font-weight:800;color:#04121a;background:linear-gradient(135deg,var(--accent),#6366f1)}
+.brand b{display:block;font-size:16px}
+.slogan{color:var(--gold);font-size:13px;font-style:italic}
+.right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lang{display:flex;gap:4px;padding:4px;border-radius:12px;border:1px solid var(--line)}
+.lang button{border:0;background:transparent;color:var(--muted);padding:6px 10px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600}
+.lang button.on{background:linear-gradient(135deg,var(--accent),#38bdf8);color:#04121a}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--text);text-decoration:none;font-size:13px;cursor:pointer}
+.btn-tg{background:linear-gradient(135deg,#229ed9,#1b6fa8);color:#fff;border-color:transparent}
+.btn-main{border:0;cursor:pointer;padding:9px 16px;border-radius:12px;font-weight:700;color:#04121a;background:linear-gradient(135deg,var(--accent),#38bdf8)}
+.hero{padding:30px 0 4px}
+.live{color:var(--up);font-size:12px;text-transform:uppercase;letter-spacing:1.5px}
+h1{margin:8px 0 6px;font-size:clamp(24px,3.6vw,40px);background:linear-gradient(90deg,var(--text),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.muted{color:var(--muted);font-size:13px;margin:4px 0}
+.unitnote{color:var(--gold);font-size:13px;margin:6px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin:22px 0 4px}
+.kpi{padding:16px 18px}
+.kpi-top{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
+.kpi-top select{flex:1;font-size:12.5px;padding:5px 8px}
+.kpi-val{font-size:26px;font-weight:700;margin:8px 0 2px;font-variant-numeric:tabular-nums}
+.sub{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sub select{width:auto;padding:3px 6px;font-size:12px}
+.top5{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:7px}
+.top5 li{position:relative;display:grid;grid-template-columns:18px 1fr auto;gap:8px;font-size:12.5px;padding-bottom:5px}
+.top5 .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top5 .vl{white-space:nowrap;font-variant-numeric:tabular-nums}
+.top5 .bar{position:absolute;left:0;bottom:0;height:3px;width:var(--w);border-radius:3px;background:var(--cc)}
+.sec{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:28px 0 12px}
+.sec h2{margin:0;font-size:20px}
+.sec p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr));gap:18px}
+.card{padding:16px 16px 12px}
+.card-h{display:flex;justify-content:space-between;gap:10px}
+.t{margin:0;font-size:15px;line-height:1.35}
+.s{color:var(--muted);font-size:12px}
+.ico{border:0;cursor:pointer;width:30px;height:30px;border-radius:9px;background:rgba(127,127,127,.14);color:var(--text)}
+.ico.x{color:var(--dn)}
+.card.open .ico.g{background:var(--accent);color:#04121a}
+.set{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.card.open .set{display:block}
+.ctl{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:10px}
+.fl{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.w{grid-column:1/-1}
+select,input{width:100%;background:var(--tb);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:7px 9px;font-size:13px;text-transform:none;letter-spacing:0}
+.ck{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:3px 8px;max-height:150px;overflow:auto;margin-top:6px;font-size:12.5px}
+.ck label{display:flex;gap:6px;align-items:center;cursor:pointer;white-space:nowrap}
+.ck i{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mini{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:8px;padding:2px 8px;font-size:11px;cursor:pointer}
+.cw{position:relative;height:300px;margin-top:10px}
+.panel{margin:26px 0;padding:16px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px}
+.tw{overflow:auto;max-height:640px;border-radius:14px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center}
+th{position:sticky;top:0;z-index:1;background:var(--tb);color:var(--muted);font-weight:600}
+th.l,td.l{text-align:left}
+td.n{text-align:right}
+tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.up{color:var(--up)}.dn{color:var(--dn)}.st{color:var(--st)}
+.bgu{background:var(--upbg)}.bgd{background:var(--dnbg)}
+.lic{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:11px;background:var(--dn);color:#fff;font-weight:600}
+.lic a{color:#fff}
+summary{cursor:pointer;font-weight:600}
+.foot{margin:26px 0 40px;padding:16px 18px;color:var(--muted);font-size:13px}
+@media(max-width:760px){.ctl{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
 
+<div class="wrap">
+  <header class="topbar glass">
+    <div class="brand">
+      <a href="https://snsratings.uz/" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/sunattagayev-cloud/Analysis_Insurance_co/files/logo_SNS.svg" alt="SNS" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="logo-fb">SNS</span></a>
+      <div><b>Standard and Sensitive Rating</b><span class="slogan" data-t="slogan"></span></div>
+    </div>
+    <div class="right">
+      <div class="lang"><button data-lang="uz">O'zbekcha</button><button data-lang="ru">Русский</button><button data-lang="en">English</button></div>
+      <button class="btn" id="theme"></button>
+      <a class="btn" href="https://snsratings.uz/" target="_blank" rel="noopener">🌐 snsratings.uz</a>
+      <a class="btn btn-tg" href="https://t.me/snsratings" target="_blank" rel="noopener">✈ <span data-t="tg"></span></a>
+    </div>
+  </header>
+</div>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="live">● <span data-t="monitoring"></span></span>
+    <h1 data-t="title"></h1>
+    <p class="muted" id="cov"></p>
+    <p class="unitnote" data-t="unitNote"></p>
+    <p class="muted"><span data-t="sourceLabel"></span> <a href="https://old.openinfo.uz" target="_blank" rel="noopener">openinfo.uz</a> · <a href="https://napp.uz" target="_blank" rel="noopener">napp.uz</a></p>
+  </section>
+
+  <div id="status" class="muted" style="text-align:center;padding:30px 0"></div>
+  <section class="kpis" id="kpis"></section>
+
+  <div class="sec">
+    <div><h2 data-t="sumH"></h2><p data-t="sumP"></p></div>
+    <button class="btn-main" data-add="sum" data-t="addChart"></button>
+  </div>
+  <section class="grid" id="gSum"></section>
+
+  <div class="sec">
+    <div><h2 data-t="relH"></h2><p data-t="relP"></p></div>
+    <button class="btn-main" data-add="rel" data-t="addChart"></button>
+  </div>
+  <section class="grid" id="gRel"></section>
+
+  <section class="glass panel">
+    <div class="sec" style="margin:0 0 12px">
+      <div><h2 data-t="t1h"></h2><p data-t="t1p"></p></div>
+      <button class="btn" id="csv1" data-t="csv"></button>
+    </div>
+    <div class="filters">
+      <label class="fl"><span data-t="ind"></span><select id="t1i"></select></label>
+      <label class="fl"><span data-t="per1"></span><select id="t1a"></select></label>
+      <label class="fl"><span data-t="per2"></span><select id="t1b"></select></label>
+    </div>
+    <div class="tw"><table id="tb1"></table></div>
+  </section>
+
+  <section class="glass panel">
+    <div class="sec" style="margin:0 0 12px">
+      <div><h2 data-t="t2h"></h2><p data-t="t2p"></p></div>
+      <button class="btn" id="csv2" data-t="csv"></button>
+    </div>
+    <div class="filters">
+      <label class="fl"><span data-t="surat"></span><select id="t2n"></select></label>
+      <label class="fl"><span data-t="maxraj"></span><select id="t2d"></select></label>
+      <label class="fl"><span data-t="per1"></span><select id="t2a"></select></label>
+      <label class="fl"><span data-t="per2"></span><select id="t2b"></select></label>
+    </div>
+    <div class="tw"><table id="tb2"></table></div>
+  </section>
+
+  <details class="glass panel" id="lic"></details>
+</main>
+
+<footer class="wrap"><div class="glass foot" data-t="copy"></div></footer>
+
+<script>
+/* ================= SOZLAMALAR ================= */
+const SRC = "https://raw.githubusercontent.com/sunattagayev-cloud/Analysis_Insurance_co/refs/heads/files/full_database.json";
+const COL = ["#22d3ee","#f5b942","#a78bfa","#34d399","#f472b6","#60a5fa","#fb923c","#e879f9","#4ade80","#facc15","#f87171","#2dd4bf"];
+const ROM = { I:1, II:2, III:3, IV:4 };
+const LOC = { uz:"uz", ru:"ru-RU", en:"en-US" };
+const CO = {
+  "ASIA INSURANCE SUG`URTA KOMPANIYASI": { uz:"Asia Insurance", ru:"Asia Insurance", en:"Asia Insurance" },
+  "O`ZBEKINVEST": { uz:"O'zbekinvest", ru:"Узбекинвест", en:"Uzbekinvest" },
+  "TEMIRYO`L SUG`URTA": { uz:"Temiryo'l sug'urta", ru:"Темирйўл сүғурта", en:"Temiryo'l Insurance" },
+};
+const COUNT_RE = /soni|joylarida|bo'linmalar/i;
+const KDEF = ["Sug'urta mukofotlari","Hisobot davrining sof foydasi (zarari)","Jami aktivlar","Amaldagi shartnomalar soni"];
+const KICO = ["💰","📈","🏦","📄"];
+const DEF_SUM = [
+  ["Sug'urta mukofotlari","line"],["Sug'urta to'lovlari (qoplamalari)","bar"],
+  ["Hisobot davrining sof foydasi (zarari)","area"],["Jami aktivlar","line"],
+  ["Amaldagi shartnomalar soni","bar"],["Sug'urta mukofotlari","doughnut"],
+];
+const DEF_REL = [
+  ["INV","Jami aktivlar","line"],
+  ["Hisobot davrining sof foydasi (zarari)","Sug'urta mukofotlari","bar"],
+  ["Sug'urta to'lovlari (qoplamalari)","Sug'urta mukofotlari","line"],
+];
+
+/* ================= MATNLAR ================= */
+const TX = {
+uz:{pageTitle:"SNS Ratings — O'zbekiston sug'urta bozori tahlili",title:"O'zbekiston sug'urta bozori tahlili",slogan:"Ishonchli reyting — barqaror bozor",monitoring:"Monitoring",tg:"Telegram kanal",
+unitNote:"Ma'lumotlar bazasida pul qiymatlari mln so'mda berilgan (katta qiymatlar trln / mlrd so'mda ko'rsatiladi).",sourceLabel:"Ma'lumot manbalari:",copy:"© Standard and Sensitive Rating — Reyting agentligi",
+sumH:"Summali ko'rsatkichlar",sumP:"Mutlaq qiymatlar: mln so'm yoki miqdor",relH:"Nisbiy ko'rsatkichlar",relP:"Ikki ko'rsatkich nisbati, foizda (Surat / Maxraj × 100%)",addChart:"+ Grafik qo'shish",
+t1h:"Tashkilotlar renkingi",t1p:"Barcha tashkilotlar bitta ro'yxatda. Litsenziyasi bekor qilinganlar ⚠ belgisi bilan ko'rsatilgan.",
+t2h:"Tashkilotlar renkingi — nisbiy ko'rsatkichlar",t2p:"Nisbiy ko'rsatkich = Surat / Maxraj × 100%",
+ind:"Ko'rsatkich",per1:"Davr 1",per2:"Davr 2",surat:"Surat",maxraj:"Maxraj",ctype:"Turi",cmode:"Ko'rinish",csec:"Sektor",cfrom:"Dan",cto:"Gacha",
+cnt:"Tashkilotlar",all:"Hammasi",clear:"Tozalash",allSec:"Barcha sektorlar",noCo:"Bu sektorda tashkilot yo'q",total:"Jami",top5:"TOP-5 tashkilot",
+modeSum:"Jami summa",modeEach:"Har bir tashkilot",types:{line:"Chiziq",bar:"Ustunli",area:"Maydonli",doughnut:"Doira"},units:{mln:"mln so'm",trn:"trln so'm",bn:"mlrd so'm",pcs:"ta"},
+coverage:(n,l,p,last)=>`${n} ta tashkilot (shundan ${l} tasi litsenziyasi bekor qilingan) · ${p} chorak · Oxirgi ma'lumot: ${last}`,
+thCo:"Tashkilot",thVal:"Qiymat",thShare:"Ulush",thRank:"Rang",thChg:"O'zgarish",thInf:"Bozor o'sishiga ta'siri",thInd:"Ko'rsatkich (%)",thChgPp:"O'zgarish (p.p.)",mkt:"Bozor (jami)",
+licH:"Ma'lumotlar bazasi to'plangan davrlar oralig'ida litsenziyasi bekor qilingan tashkilotlar",licDate:"Sana",licNote:"Izoh",lic:"Litsenziya bekor qilingan",post:"Litsenziyasi bekor qilingandan keyin ham ba'zi davr hisobotlari openinfo.uz saytiga joylashtirilgan",src:"manba",
+lightBtn:"☀️ Kun",darkBtn:"🌙 Tun",csv:"⬇ CSV"},
+ru:{pageTitle:"SNS Ratings — Анализ страхового рынка Узбекистана",title:"Анализ страхового рынка Узбекистана",slogan:"Надежный рейтинг — стабильный рынок",monitoring:"Мониторинг",tg:"Telegram-канал",
+unitNote:"В базе данных денежные значения даны в млн сум (крупные суммы показаны в трлн / млрд сум).",sourceLabel:"Источники данных:",copy:"© Standard and Sensitive Rating — Рейтинговое агентство",
+sumH:"Абсолютные показатели",sumP:"Абсолютные значения: млн сум или количество",relH:"Относительные показатели",relP:"Отношение двух показателей, в процентах (Числитель / Знаменатель × 100%)",addChart:"+ Добавить график",
+t1h:"Рейтинг организаций",t1p:"Все организации в одном списке. Организации с аннулированной лицензией отмечены знаком ⚠.",
+t2h:"Рейтинг организаций — относительные показатели",t2p:"Относительный показатель = Числитель / Знаменатель × 100%",
+ind:"Показатель",per1:"Период 1",per2:"Период 2",surat:"Числитель",maxraj:"Знаменатель",ctype:"Тип",cmode:"Вид",csec:"Сектор",cfrom:"С",cto:"По",
+cnt:"Организации",all:"Все",clear:"Очистить",allSec:"Все сектора",noCo:"В этом секторе нет организаций",total:"Итого",top5:"ТОП-5 организаций",
+modeSum:"Общая сумма",modeEach:"По каждой организации",types:{line:"Линия",bar:"Столбцы",area:"Область",doughnut:"Кольцо"},units:{mln:"млн сум",trn:"трлн сум",bn:"млрд сум",pcs:"шт."},
+coverage:(n,l,p,last)=>`Организаций: ${n} (с аннулированной лицензией: ${l}) · кварталов: ${p} · Последние данные: ${last}`,
+thCo:"Организация",thVal:"Значение",thShare:"Доля",thRank:"Ранг",thChg:"Изменение",thInf:"Влияние на рост рынка",thInd:"Показатель (%)",thChgPp:"Изменение (п.п.)",mkt:"Рынок (итого)",
+licH:"Организации с аннулированной лицензией в период сбора базы данных",licDate:"Дата",licNote:"Примечание",lic:"Лицензия аннулирована",post:"После аннулирования лицензии часть отчетов за отдельные периоды размещена на сайте openinfo.uz",src:"источник",
+lightBtn:"☀️ День",darkBtn:"🌙 Ночь",csv:"⬇ CSV"},
+en:{pageTitle:"SNS Ratings — Uzbekistan Insurance Market Analysis",title:"Uzbekistan Insurance Market Analysis",slogan:"Reliable ratings — stable market",monitoring:"Monitoring",tg:"Telegram channel",
+unitNote:"In the database, monetary values are given in mln UZS (large amounts are shown in trn / bn UZS).",sourceLabel:"Data sources:",copy:"© Standard and Sensitive Rating — Rating Agency",
+sumH:"Absolute indicators",sumP:"Absolute values: mln UZS or count",relH:"Relative indicators",relP:"Ratio of two indicators, in percent (Numerator / Denominator × 100%)",addChart:"+ Add chart",
+t1h:"Company ranking",t1p:"All companies in one list. Companies with suspended licenses are marked with ⚠.",
+t2h:"Company ranking — relative indicators",t2p:"Relative indicator = Numerator / Denominator × 100%",
+ind:"Indicator",per1:"Period 1",per2:"Period 2",surat:"Numerator",maxraj:"Denominator",ctype:"Type",cmode:"View",csec:"Sector",cfrom:"From",cto:"To",
+cnt:"Companies",all:"All",clear:"Clear",allSec:"All sectors",noCo:"No companies in this sector",total:"Total",top5:"TOP-5 companies",
+modeSum:"Total sum",modeEach:"Each company",types:{line:"Line",bar:"Bar",area:"Area",doughnut:"Doughnut"},units:{mln:"mln UZS",trn:"trn UZS",bn:"bn UZS",pcs:"pcs"},
+coverage:(n,l,p,last)=>`${n} companies (${l} with suspended license) · ${p} quarters · Latest data: ${last}`,
+thCo:"Company",thVal:"Value",thShare:"Share",thRank:"Rank",thChg:"Change",thInf:"Market growth impact",thInd:"Indicator (%)",thChgPp:"Change (p.p.)",mkt:"Market (total)",
+licH:"Companies with suspended licenses within the database period",licDate:"Date",licNote:"Note",lic:"License suspended",post:"Even after the license was suspended, some period reports were published on openinfo.uz",src:"source",
+lightBtn:"☀️ Day",darkBtn:"🌙 Night",csv:"⬇ CSV"},
+};
+
+/* ================= HOLAT ================= */
+const $ = id => document.getElementById(id);
+const t = (k, ...a) => { const v = TX[LANG][k]; return typeof v === "function" ? v(...a) : v; };
+let LANG = "uz", DS = null, cards = [], uid = 0, KP = [];
+const T1 = { i:0, a:0, b:0 }, T2 = { n:0, d:0, a:0, b:0 };
+const charts = new Map();
+
+/* ================= YORDAMCHILAR ================= */
+const nf = (n, d = 2) => new Intl.NumberFormat(LOC[LANG], { maximumFractionDigits: d }).format(n);
+const pct = (v, T) => v == null || !T ? "-" : nf(v / T * 100) + "%";
+const sg = v => v == null || v === 0 ? "st" : v > 0 ? "up" : "dn";
+const cmpC = (x, y) => x == null || y == null || x === y ? "st" : y > x ? "up" : "dn";
+const rc = (a, b) => a == null || b == null || a === b ? "st" : b < a ? "up" : "dn";
+const opt = (v, l, sel) => `<option value="${v}"${String(v) === String(sel) ? " selected" : ""}>${l}</option>`;
+const isCount = i => COUNT_RE.test(DS.I[i].uz);
+const iname = i => DS.I[i][LANG] || DS.I[i].uz;
+const sname = s => DS.S[s][LANG] || DS.S[s].uz;
+const cn = c => DS.C[c].nm[LANG];
+const cname = c => cn(c) + (DS.C[c].L ? " ⚠" : "");
+const opn = k => DS.OPS[k].n[LANG] || DS.OPS[k].n.uz;
+const plabel = p => {
+  const [y, q] = DS.P[p].split("_");
+  return LANG === "en" ? `${y} · Q${ROM[q]}` : LANG === "ru" ? `${y} · ${q} кв.` : `${y} · ${q} chorak`;
+};
+const badge = c => {
+  const L = DS.C[c].L;
+  if (!L) return "";
+  return ` <span class="lic">⚠ ${t("lic")} · <a href="${L.src}" target="_blank" rel="noopener">${t("src")}</a></span>`;
+};
+const visibleComps = s => s === "all" ? DS.C.map((_, i) => i) : [...(DS.SC.get(s) || [])].sort((a, b) => a - b);
+const indOpts = sel => DS.I.map((_, i) => opt(i, iname(i), sel)).join("");
+const opOpts = sel => DS.OPS.map((_, k) => opt(k, opn(k), sel)).join("");
+const perOpts = sel => DS.P.map((_, i) => opt(i, plabel(i), sel)).join("");
+const secOpts = sel => opt("all", t("allSec"), sel) + DS.S.map((_, k) => opt(k, sname(k), sel)).join("");
+
+function fmtShort(i, v) {
+  if (v == null) return "-";
+  const U = TX[LANG].units;
+  if (isCount(i)) return nf(v, 0) + " " + U.pcs;
+  const a = Math.abs(v);
+  if (a >= 1e6) return nf(v / 1e6) + " " + U.trn;
+  if (a >= 1e3) return nf(v / 1e3) + " " + U.bn;
+  return nf(v) + " " + U.mln;
+}
+
+/* ================= MA'LUMOTNI QAYTA ISHLASH ================= */
+function build(d) {
+  const V = d.Indicators_value;
+  const LM = new Map((d.License_suspended || []).map(x => [x["Company name"], {
+    date: x.date, src: x.source,
+    t: new Date(+x.date.slice(6), +x.date.slice(3, 5) - 1, +x.date.slice(0, 2)).getTime(),
+  }]));
+  const I = d.Indicators.map(x => ({ uz: x["O'zbek tilida"], ru: x["Rus tilida"], en: x["Ingliz tilida"] }));
+  const iIdx = new Map(I.map((o, i) => [o.uz, i]));
+  const SL = (d.Sectors || []).map(x => ({ uz: x["O'zbek tilida"], ru: x["Rus tilida"], en: x["Ingliz tilida"] }));
+  V.forEach(x => { if (!SL.some(o => o.uz === x.Sector)) SL.push({ uz: x.Sector, ru: x.Sector, en: x.Sector }); });
+  const sIdx = new Map(SL.map((o, i) => [o.uz, i]));
+  // Faqat ma'lumoti bor tashkilotlar (litsenziyasi bekor qilinganlardan ham)
+  const raws = [...new Set(V.map(x => x["Company name"]))], cIdx = new Map(raws.map((r, i) => [r, i]));
+  const C = raws.map(r => {
+    const nm = CO[r] || { uz: r.replace(/`/g, "'"), ru: r.replace(/`/g, "'"), en: r.replace(/`/g, "'") };
+    return { nm, L: LM.get(r) || null, post: false };
+  });
+  const P = [...new Set(V.map(x => x.Period))].sort((a, b) => {
+    const [ya, qa] = a.split("_"), [yb, qb] = b.split("_");
+    return (ya - yb) || (ROM[qa] - ROM[qb]);
+  });
+  const pIdx = new Map(P.map((p, i) => [p, i]));
+  const pT = P.map(p => { const [y, q] = p.split("_"); return new Date(+y, (ROM[q] - 1) * 3, 1).getTime(); });
+  const A = new Map(), B = new Map(), SC = new Map();
+  for (const x of V) {
+    const i = iIdx.get(x.Indicator), v = Number(x.Value), s = sIdx.get(x.Sector);
+    const c = cIdx.get(x["Company name"]), p = pIdx.get(x.Period);
+    if (i === undefined || !Number.isFinite(v)) continue;
+    const ka = `${i}|${c}|${p}`, kb = `${ka}|${s}`;
+    A.set(ka, (A.get(ka) || 0) + v);
+    B.set(kb, (B.get(kb) || 0) + v);
+    if (!SC.has(s)) SC.set(s, new Set());
+    SC.get(s).add(c);
+    if (C[c].L && pT[p] >= C[c].L.t) C[c].post = true; // litsenziya bekor qilinganidan keyingi ma'lumot
+  }
+  const OPS = I.map((o, i) => ({ n: o, ix: [i] }));
+  OPS.push({
+    n: { uz:"Investitsiyalar (uzoq + qisqa)", ru:"Инвестиции (долгоср. + краткоср.)", en:"Investments (long + short-term)" },
+    ix: [iIdx.get("Uzoq muddatli investitsiyalar"), iIdx.get("Qisqa muddatli investitsiyalar")],
+  });
+  return { I, S: SL, C, P, iIdx, A, B, SC, OPS, LAST: P.length - 1 };
+}
+
+function val(i, c, p, s = "all") {
+  const v = s === "all" ? DS.A.get(`${i}|${c}|${p}`) : DS.B.get(`${i}|${c}|${p}|${s}`);
+  return v === undefined ? null : v;
+}
+function opv(k, c, p, s = "all") {
+  let r = null;
+  for (const i of DS.OPS[k].ix) { const v = val(i, c, p, s); if (v != null) r = (r ?? 0) + v; }
+  return r;
+}
+function sumOps(k, cs, p, s = "all") {
+  let r = null;
+  for (const c of cs) { const v = opv(k, c, p, s); if (v != null) r = (r ?? 0) + v; }
+  return r;
+}
+function ratio(n, d, c, p, s = "all") {
+  const a = opv(n, c, p, s), b = opv(d, c, p, s);
+  return a == null || !b ? null : a / b * 100;
+}
+
+/* ================= KPI ================= */
+function renderKpis() {
+  $("kpis").innerHTML = KP.map((k, n) => {
+    const items = DS.C.map((_, c) => ({ c, v: val(k.i, c, k.p) })).filter(x => x.v != null);
+    const total = items.reduce((s, x) => s + x.v, 0);
+    const top = [...items].sort((a, b) => b.v - a.v).slice(0, 5);
+    const max = Math.max(...top.map(x => Math.abs(x.v)), 1);
+    return `<article class="kpi glass">
+      <div class="kpi-top"><span>${KICO[n]}</span><select data-kpi="${n}" data-f="i">${indOpts(k.i)}</select></div>
+      <div class="kpi-val">${fmtShort(k.i, total)}</div>
+      <div class="sub"><select data-kpi="${n}" data-f="p">${perOpts(k.p)}</select><span>· ${t("total")}</span></div>
+      <div class="sub" style="margin-top:8px;color:var(--text);font-weight:600">${t("top5")}</div>
+      <ul class="top5">${top.map((x, r) => `<li style="--w:${(Math.abs(x.v) / max * 100).toFixed(1)}%;--cc:${COL[x.c % COL.length]}">
+        <span class="s">${r + 1}</span><span class="nm">${cname(x.c)}</span><span class="vl">${fmtShort(k.i, x.v)}</span><span class="bar"></span></li>`).join("")}</ul>
+    </article>`;
+  }).join("");
+}
+
+/* ================= GRAFIKLAR ================= */
+function makeCard(kind, o) {
+  return {
+    id: ++uid, kind, ind: o.ind ?? 0, num: o.num ?? 0, den: o.den ?? 0, type: o.type,
+    mode: "sum", s: "all", from: 0, to: DS.P.length - 1, open: false,
+    comps: new Set(DS.C.map((_, i) => i)),
+  };
+}
+const rng = c => {
+  if (c.type === "doughnut") return [c.to];
+  const a = []; for (let p = c.from; p <= c.to; p++) a.push(p);
+  return a;
+};
+const F = (c, ci, p) => c.kind === "rel" ? ratio(c.num, c.den, ci, p, c.s) : val(c.ind, ci, p, c.s);
+const activeComps = c => visibleComps(c.s).filter(ci => rng(c).some(p => F(c, ci, p) != null));
+
+function cardHtml(c) {
+  const rel = c.kind === "rel", secName = c.s === "all" ? t("allSec") : sname(c.s);
+  const title = rel ? `${opn(c.num)} / ${opn(c.den)}` : iname(c.ind);
+  const types = (rel ? ["line","bar","area"] : ["line","bar","area","doughnut"]).map(v => opt(v, t("types")[v], c.type)).join("");
+  const modes = opt("sum", t("modeSum"), c.mode) + opt("each", t("modeEach"), c.mode);
+  const vis = activeComps(c);
+  const ck = vis.map(ci => `<label><input type="checkbox" data-c="${ci}"${c.comps.has(ci) ? " checked" : ""}><i style="background:${COL[ci % COL.length]}"></i><span>${cname(ci)}</span></label>`).join("")
+    || `<span class="s">${t("noCo")}</span>`;
+  const sel = vis.filter(x => c.comps.has(x)).length;
+  const sub = c.type === "doughnut"
+    ? `${secName} · ${plabel(c.to)}`
+    : `${secName} · ${c.mode === "sum" ? t("modeSum") : t("modeEach")} · ${plabel(c.from)} — ${plabel(c.to)}`;
+  const first = rel
+    ? `<label class="fl w"><span>${t("surat")}</span><select data-k="num">${opOpts(c.num)}</select></label>
+       <label class="fl w"><span>${t("maxraj")}</span><select data-k="den">${opOpts(c.den)}</select></label>`
+    : `<label class="fl w"><span>${t("ind")}</span><select data-k="ind">${indOpts(c.ind)}</select></label>`;
+  return `<div class="card-h">
+      <div><h3 class="t">${title}</h3><small class="s">${sub}</small></div>
+      <div><button class="ico g" data-act="gear">⚙</button> <button class="ico x" data-act="rm">✕</button></div>
+    </div>
+    <div class="set">
+      <div class="ctl">${first}
+        <label class="fl"><span>${t("ctype")}</span><select data-k="type">${types}</select></label>
+        <label class="fl"><span>${t("cmode")}</span><select data-k="mode">${modes}</select></label>
+        <label class="fl"><span>${t("csec")}</span><select data-k="s">${secOpts(c.s)}</select></label>
+        <label class="fl"><span>${t("cfrom")}</span><select data-k="from">${perOpts(c.from)}</select></label>
+        <label class="fl"><span>${t("cto")}</span><select data-k="to">${perOpts(c.to)}</select></label>
+      </div>
+      <div class="s">${t("cnt")} (${sel}/${vis.length}) <button class="mini" data-act="all">${t("all")}</button> <button class="mini" data-act="none">${t("clear")}</button></div>
+      <div class="ck">${ck}</div>
+    </div>
+    <div class="cw"><canvas></canvas></div>`;
+}
+
+function aggF(c, cs, p) {
+  if (c.kind === "rel") {
+    const a = sumOps(c.num, cs, p, c.s), b = sumOps(c.den, cs, p, c.s);
+    return a == null || !b ? null : a / b * 100;
+  }
+  let r = null;
+  for (const ci of cs) { const v = val(c.ind, ci, p, c.s); if (v != null) r = (r ?? 0) + v; }
+  return r;
+}
+
+const mk = (label, data, color, type, lic) => ({
+  label, data, borderColor: color,
+  backgroundColor: type === "bar" ? color + "cc" : type === "area" ? color + "33" : color,
+  fill: type === "area", tension: .3, borderWidth: 2.5,
+  borderDash: lic ? [6, 4] : [], pointRadius: data.length > 14 ? 0 : 4, pointHoverRadius: 7,
+  spanGaps: true, borderRadius: 6, maxBarThickness: 36,
+});
+
+function drawChart(c) {
+  charts.get(c.id)?.destroy(); charts.delete(c.id);
+  if (typeof Chart === "undefined") return;
+  const cv = $("c" + c.id)?.querySelector("canvas");
+  if (!cv) return;
+  const cs = getComputedStyle(document.documentElement);
+  const mut = cs.getPropertyValue("--muted").trim(), grid = cs.getPropertyValue("--line").trim();
+  const rel = c.kind === "rel", comps = activeComps(c).filter(x => c.comps.has(x)), R = rng(c);
+  const fv = v => rel ? (v == null ? "-" : nf(v) + "%") : fmtShort(c.ind, v);
+  const TT = { backgroundColor: "rgba(7,12,24,.94)", titleColor: "#f1f5f9", bodyColor: "#cbd5e1", padding: 10, cornerRadius: 10 };
+  const legend = { position: "bottom", labels: { color: mut, usePointStyle: true, boxWidth: 7, padding: 10, font: { size: 10 } } };
+  let config;
+  if (c.type === "doughnut") {
+    config = {
+      type: "doughnut",
+      data: { labels: comps.map(cname), datasets: [{ data: comps.map(ci => F(c, ci, c.to) ?? 0), backgroundColor: comps.map(ci => COL[ci % COL.length]), borderColor: "#0d1628", borderWidth: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: "60%",
+        plugins: { legend, tooltip: { ...TT, callbacks: { label: x => ` ${x.label}: ${fv(x.parsed)}` } } } },
+    };
+  } else {
+    const ds = c.mode === "sum"
+      ? [mk(`${t("total")} (${comps.length})`, R.map(p => aggF(c, comps, p)), COL[0], c.type, false)]
+      : comps.map(ci => mk(cname(ci), R.map(p => F(c, ci, p)), COL[ci % COL.length], c.type, !!DS.C[ci].L));
+    config = {
+      type: c.type === "area" ? "line" : c.type,
+      data: { labels: R.map(plabel), datasets: ds },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: { legend, tooltip: { ...TT, callbacks: { label: x => ` ${x.dataset.label}: ${fv(x.parsed.y)}` } } },
+        scales: {
+          x: { ticks: { color: mut, maxRotation: 40, autoSkip: true }, grid: { color: grid } },
+          y: { ticks: { color: mut, callback: v => rel ? nf(v) + "%" : fmtShort(c.ind, v) }, grid: { color: grid } },
+        },
+      },
+    };
+  }
+  charts.set(c.id, new Chart(cv.getContext("2d"), config));
+}
+
+function paint(c) {
+  let el = $("c" + c.id);
+  if (!el) {
+    el = document.createElement("article");
+    el.id = "c" + c.id;
+    $(c.kind === "sum" ? "gSum" : "gRel").appendChild(el);
+  }
+  el.className = "card glass" + (c.open ? " open" : "");
+  el.innerHTML = cardHtml(c);
+  drawChart(c);
+}
+
+const cardOf = el => { const id = +el.closest(".card").id.slice(1); return cards.find(c => c.id === id); };
+
+["gSum", "gRel"].forEach(g => {
+  $(g).addEventListener("change", e => {
+    const c = cardOf(e.target); if (!c) return;
+    const el = e.target, k = el.dataset.k;
+    if (el.dataset.c !== undefined) { const ci = +el.dataset.c; el.checked ? c.comps.add(ci) : c.comps.delete(ci); }
+    else if (k === "ind") c.ind = +el.value;
+    else if (k === "num") c.num = +el.value;
+    else if (k === "den") c.den = +el.value;
+    else if (k === "type") c.type = el.value;
+    else if (k === "mode") c.mode = el.value;
+    else if (k === "s") { c.s = el.value === "all" ? "all" : +el.value; c.comps = new Set(visibleComps(c.s)); }
+    else if (k === "from") { c.from = +el.value; if (c.from > c.to) c.to = c.from; }
+    else if (k === "to") { c.to = +el.value; if (c.to < c.from) c.from = c.to; }
+    paint(c);
+  });
+  $(g).addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const c = cardOf(b), a = b.dataset.act;
+    if (a === "gear") { c.open = !c.open; $("c" + c.id).classList.toggle("open", c.open); }
+    else if (a === "rm") { charts.get(c.id)?.destroy(); charts.delete(c.id); cards = cards.filter(x => x !== c); $("c" + c.id).remove(); }
+    else if (a === "all") { activeComps(c).forEach(x => c.comps.add(x)); paint(c); }
+    else if (a === "none") { visibleComps(c.s).forEach(x => c.comps.delete(x)); paint(c); }
+  });
+});
+
+document.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => {
+  const c = b.dataset.add === "sum"
+    ? makeCard("sum", { ind: DS.iIdx.get("Jami kapital"), type: "line" })
+    : makeCard("rel", { num: DS.OPS.length - 1, den: DS.iIdx.get("Jami aktivlar"), type: "line" });
+  c.open = true; cards.push(c); paint(c);
+  $("c" + c.id).scrollIntoView({ behavior: "smooth", block: "center" });
+}));
+
+$("kpis").addEventListener("change", e => {
+  const n = +e.target.dataset.kpi;
+  KP[n][e.target.dataset.f] = +e.target.value;
+  renderKpis();
+});
+
+/* ================= JADVALLAR ================= */
+function rankOf(R, k) {
+  const m = new Map();
+  R.filter(r => r[k] != null).sort((p, q) => q[k] - p[k]).forEach((r, i) => m.set(r.c, i + 1));
+  return m;
+}
+
+function renderT1() {
+  if (T1.a > T1.b) [T1.a, T1.b] = [T1.b, T1.a];
+  const { i, a, b } = T1;
+  // Ikkala davrda ham qiymati yo'q tashkilotlar jadvaldan chiqariladi
+  const R = DS.C.map((_, c) => ({ c, x: val(i, c, a), y: val(i, c, b) })).filter(r => r.x != null || r.y != null);
+  const Ta = R.reduce((s, r) => s + (r.x ?? 0), 0), Tb = R.reduce((s, r) => s + (r.y ?? 0), 0);
+  const tch = Ta ? (Tb - Ta) / Math.abs(Ta) * 100 : null;
+  const r1 = rankOf(R, "x"), r2 = rankOf(R, "y");
+  const rows = R.sort((p, q) => (r2.get(p.c) ?? 1e6) - (r2.get(q.c) ?? 1e6) || p.c - q.c);
+  const un = isCount(i) ? TX[LANG].units.pcs : TX[LANG].units.mln;
+  $("t1i").value = i; $("t1a").value = a; $("t1b").value = b;
+  $("tb1").innerHTML = `<thead>
+    <tr><th class="l" rowspan="2">${t("thCo")}</th><th colspan="3">${plabel(a)}</th><th colspan="3">${plabel(b)}</th><th rowspan="2">${t("thChg")}</th><th rowspan="2">${t("thInf")}</th></tr>
+    <tr><th>${t("thVal")} (${un})</th><th>${t("thShare")}</th><th>${t("thRank")}</th><th>${t("thVal")} (${un})</th><th>${t("thShare")}</th><th>${t("thRank")}</th></tr>
+  </thead><tbody>` + rows.map(({ c, x, y }) => {
+    const ch = x == null || y == null || !x ? null : (y - x) / Math.abs(x) * 100;
+    const inf = ((y ?? 0) - (x ?? 0)) / (Ta || 1) * 100;
+    const bg = ch == null ? "" : ch > tch ? "bgu" : "bgd";
+    return `<tr>
+      <td class="l">${cn(c)}${badge(c)}</td>
+      <td class="n">${x == null ? "-" : nf(x)}</td><td>${pct(x, Ta)}</td><td>${r1.get(c) ?? "-"}</td>
+      <td class="n ${cmpC(x, y)}">${y == null ? "-" : nf(y)}</td><td>${pct(y, Tb)}</td>
+      <td class="${rc(r1.get(c), r2.get(c))}">${r2.get(c) ?? "-"}</td>
+      <td class="${bg} ${sg(ch)}">${ch == null ? "-" : nf(ch) + "%"}</td>
+      <td class="${sg(inf)}">${nf(inf)}%</td>
+    </tr>`;
+  }).join("") + `<tr class="tot">
+      <td class="l">${t("total")}</td><td class="n">${nf(Ta)}</td><td>100%</td><td></td>
+      <td class="n">${nf(Tb)}</td><td>100%</td><td></td>
+      <td class="${sg(tch)}">${tch == null ? "-" : nf(tch) + "%"}</td><td></td>
+    </tr></tbody>`;
+}
+
+function renderT2() {
+  if (T2.a > T2.b) [T2.a, T2.b] = [T2.b, T2.a];
+  const { n, d, a, b } = T2, ALL = DS.C.map((_, i) => i);
+  const R = DS.C.map((_, c) => ({ c, x: ratio(n, d, c, a), y: ratio(n, d, c, b) })).filter(r => r.x != null || r.y != null);
+  const tot = p => { const N = sumOps(n, ALL, p), D = sumOps(d, ALL, p); return N == null || !D ? null : N / D * 100; };
+  const ta = tot(a), tb = tot(b), T = ta == null || tb == null ? null : tb - ta;
+  const r1 = rankOf(R, "x"), r2 = rankOf(R, "y");
+  const rows = R.sort((p, q) => (r2.get(p.c) ?? 1e6) - (r2.get(q.c) ?? 1e6) || p.c - q.c);
+  $("t2n").value = n; $("t2d").value = d; $("t2a").value = a; $("t2b").value = b;
+  $("tb2").innerHTML = `<thead>
+    <tr><th class="l" rowspan="2">${t("thCo")}</th><th colspan="2">${plabel(a)}</th><th colspan="2">${plabel(b)}</th><th rowspan="2">${t("thChgPp")}</th></tr>
+    <tr><th>${t("thInd")}</th><th>${t("thRank")}</th><th>${t("thInd")}</th><th>${t("thRank")}</th></tr>
+  </thead><tbody>` + rows.map(({ c, x, y }) => {
+    const dd = x == null || y == null ? null : y - x;
+    return `<tr>
+      <td class="l">${cn(c)}${badge(c)}</td>
+      <td>${x == null ? "-" : nf(x) + "%"}</td><td>${r1.get(c) ?? "-"}</td>
+      <td class="${cmpC(x, y)}">${y == null ? "-" : nf(y) + "%"}</td>
+      <td class="${rc(r1.get(c), r2.get(c))}">${r2.get(c) ?? "-"}</td>
+      <td class="${sg(dd)}">${dd == null ? "-" : (dd > 0 ? "+" : "") + nf(dd)}</td>
+    </tr>`;
+  }).join("") + `<tr class="tot">
+      <td class="l">${t("mkt")}</td><td>${ta == null ? "-" : nf(ta) + "%"}</td><td></td>
+      <td>${tb == null ? "-" : nf(tb) + "%"}</td><td></td>
+      <td class="${sg(T)}">${T == null ? "-" : (T > 0 ? "+" : "") + nf(T)}</td>
+    </tr></tbody>`;
+}
+
+function exportCsv(id, name) {
+  const lines = [...$(id).rows].map(r => [...r.cells].map(c => `"${c.textContent.trim().replace(/"/g, '""')}"`).join(";"));
+  const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$("csv1").addEventListener("click", () => exportCsv("tb1", "reyting_summali.csv"));
+$("csv2").addEventListener("click", () => exportCsv("tb2", "reyting_nisbiy.csv"));
+
+$("t1i").addEventListener("change", e => { T1.i = +e.target.value; renderT1(); });
+$("t1a").addEventListener("change", e => { T1.a = +e.target.value; renderT1(); });
+$("t1b").addEventListener("change", e => { T1.b = +e.target.value; renderT1(); });
+$("t2n").addEventListener("change", e => { T2.n = +e.target.value; renderT2(); });
+$("t2d").addEventListener("change", e => { T2.d = +e.target.value; renderT2(); });
+$("t2a").addEventListener("change", e => { T2.a = +e.target.value; renderT2(); });
+$("t2b").addEventListener("change", e => { T2.b = +e.target.value; renderT2(); });
+
+function renderLic() {
+  const L = DS.C.map((x, c) => ({ x, c })).filter(o => o.x.L);
+  $("lic").innerHTML = `<summary>${t("licH")} (${L.length})</summary>
+    <div class="tw" style="margin-top:10px"><table>
+      <thead><tr><th class="l">${t("thCo")}</th><th class="l">${t("licDate")}</th><th class="l">${t("licNote")}</th><th class="l">${t("src")}</th></tr></thead>
+      <tbody>${L.map(({ x, c }) => `<tr><td class="l">${cn(c)}</td><td class="l">${x.L.date}</td>
+        <td class="l">${x.post ? t("post") : "-"}</td>
+        <td class="l"><a href="${x.L.src}" target="_blank" rel="noopener">napp.uz</a></td></tr>`).join("")}</tbody>
+    </table></div>`;
+}
+
+/* ================= TIL, REJIM, YANGILASH ================= */
+function initSel() {
+  $("t1i").innerHTML = indOpts(T1.i);
+  $("t1a").innerHTML = perOpts(T1.a);
+  $("t1b").innerHTML = perOpts(T1.b);
+  $("t2n").innerHTML = opOpts(T2.n);
+  $("t2d").innerHTML = opOpts(T2.d);
+  $("t2a").innerHTML = perOpts(T2.a);
+  $("t2b").innerHTML = perOpts(T2.b);
+}
+
+function renderAll() {
+  if (!DS) return;
+  $("cov").textContent = t("coverage", DS.C.length, DS.C.filter(x => x.L).length, DS.P.length, plabel(DS.LAST));
+  initSel(); renderKpis(); cards.forEach(paint); renderT1(); renderT2(); renderLic();
+}
+
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  document.title = t("pageTitle");
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = t(el.dataset.t); });
+  document.querySelectorAll(".lang button").forEach(b => b.classList.toggle("on", b.dataset.lang === LANG));
+  applyThemeLabel();
+}
+
+function applyThemeLabel() {
+  $("theme").textContent = document.documentElement.dataset.theme === "light" ? t("darkBtn") : t("lightBtn");
+}
+
+function setLang(l) {
+  LANG = l;
+  try { localStorage.setItem("sns-lang", l); } catch (e) {}
+  applyStatic(); renderAll();
+}
+document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+function setTheme(x) {
+  document.documentElement.dataset.theme = x;
+  applyThemeLabel();
+  cards.forEach(drawChart);
+}
+$("theme").addEventListener("click", () => {
+  const x = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  setTheme(x);
+  try { localStorage.setItem("sns-theme", x); } catch (e) {}
+});
+
+async function load() {
+  $("status").textContent = t("loading");
+  try {
+    const r = await fetch(SRC, { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    DS = build(await r.json());
+    $("status").textContent = "";
+    const ix = n => DS.iIdx.get(n) ?? 0;
+    KP = KDEF.map(n => ({ i: ix(n), p: DS.LAST }));
+    T1.i = ix("Jami aktivlar"); T1.a = 0; T1.b = DS.LAST;
+    T2.n = DS.OPS.length - 1; T2.d = ix("Jami aktivlar"); T2.a = 0; T2.b = DS.LAST;
+    cards = [
+      ...DEF_SUM.map(([n, ty]) => makeCard("sum", { ind: ix(n), type: ty })),
+      ...DEF_REL.map(([n, dn, ty]) => makeCard("rel", { num: n === "INV" ? DS.OPS.length - 1 : ix(n), den: ix(dn), type: ty })),
+    ];
+    renderAll();
+  } catch (e) {
+    console.error(e);
+    $("status").innerHTML = `<b>${t("errTitle")}</b> <a href="#" id="rt">↻</a>`;
+    $("rt").addEventListener("click", ev => { ev.preventDefault(); load(); });
+  }
+}
+
+let th = "dark", lg = "uz";
+try { th = localStorage.getItem("sns-theme") || "dark"; lg = localStorage.getItem("sns-lang") || "uz"; } catch (e) {}
+document.documentElement.dataset.theme = th;
+LANG = lg;
+applyStatic();
+if (typeof Chart === "undefined") $("status").textContent = t("libErr");
+else load();
+</script>
+</body>
+</html>
