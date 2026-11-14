@@ -227465,5 +227465,42 @@
             "Indicator": "Asosiy faoliyatdan olingan foyda (zarar)",
             "Value": -56335.5
         }
+    ],
+    "License_suspended": [
+        {
+            "Company name": "UNIPOLIS",
+            "date": "12.10.2023",
+            "source": "https://napp.uz/ru/news/sug-urta-tashkiloti-litsenziyasi-bekor-qilindi"
+        },
+        {
+            "Company name": "FAROVON SUG`URTA",
+            "date": "30.10.2023",
+            "source": "https://napp.uz/ru/news/farovon-sug-urta-aj-cug-urta-tashkiloti-litsenziyasi-bekor-qilindi"
+        },
+        {
+            "Company name": "SHARQ-SUG`URTA",
+            "date": "31.10.2023",
+            "source": "https://napp.uz/ru/news/sug-urta-tashkiloti-litsenziyasi-bekor-qilindi-2"
+        },
+        {
+            "Company name": "ASKO-VOSTOK",
+            "date": "03.11.2023",
+            "source": "https://napp.uz/ru/news/sug-urta-tashkiloti-litsenziyasi-bekor-qilindi-3"
+        },
+        {
+            "Company name": "UNIVERSAL SUG`URTA",
+            "date": "02.04.2024",
+            "source": "https://napp.uz/ru/news/universal-sug-urta-sug-urta-tashkiloti-litsenziyasi-bekor-qilindi"
+        },
+        {
+            "Company name": "NEW LIFE SUG`URTA KOMPANIYASI",
+            "date": "22.05.2024",
+            "source": "https://napp.uz/ru/news/new-life-sug-urta-kompaniyasi-aj-litsenziyasi-bekor-qilindi"
+        },
+        {
+            "Company name": "OMAD SUG`URTA",
+            "date": "02.11.2024",
+            "source": "https://napp.uz/ru/news/omad-sug-urta-aj-litsenziyasi-bekor-qilindi"
+        }
     ]
 }
